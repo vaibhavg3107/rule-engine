@@ -3,6 +3,7 @@ package com.example.ruleengine.controller;
 import com.example.ruleengine.dto.request.CreatePolicySetRequest;
 import com.example.ruleengine.dto.request.TestRuleRequest;
 import com.example.ruleengine.dto.response.PolicySetResponse;
+import com.example.ruleengine.dto.response.UnifiedEvaluationResultResponse;
 import com.example.ruleengine.service.PolicySetService;
 import com.example.ruleengine.service.UnifiedEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,10 +71,10 @@ public class PolicySetController {
 
     @PostMapping("/{id}/evaluate")
     @Operation(summary = "Evaluate a policy set (unified evaluation combining boolean and offer policies)")
-    public ResponseEntity<UnifiedEvaluationService.UnifiedEvaluationResult> evaluatePolicySet(
+    public ResponseEntity<UnifiedEvaluationResultResponse> evaluatePolicySet(
             @PathVariable UUID id,
             @Valid @RequestBody TestRuleRequest request) {
-        UnifiedEvaluationService.UnifiedEvaluationResult result = 
+        UnifiedEvaluationResultResponse result = 
                 unifiedEvaluationService.evaluate(id, request.getInputData());
         return ResponseEntity.ok(result);
     }

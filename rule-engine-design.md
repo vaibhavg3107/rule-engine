@@ -855,45 +855,39 @@ DELETE /api/v1/policy-sets/{policySetId}
 
 ### 5.6 Evaluation API
 
-Single unified API that evaluates both Boolean (eligibility) and Offer policies, returning a combined response.
+Single unified API that evaluates both Boolean (eligibility) and Offer policies, returning a simplified response with decision and offer.
 
 **Evaluate Policy Set**
 ```
-POST /api/v1/evaluate/{policySetId}
+POST /api/v1/policy-sets/{policySetId}/evaluate
 ```
 Request:
 ```json
 {
   "inputData": {
-    "user": {
-      "age": 28,
-      "annualIncome": 750000,
+    "applicant": {
+      "age": 30,
+      "monthlyIncome": 50000,
       "creditScore": 720,
-      "employmentType": "SALARIED",
-      "existingLoans": 1
+      "employmentType": "SALARIED"
     }
-  },
-  "includeTrace": false
+  }
 }
 ```
 
 **Response (Approved with Offer):**
 ```json
 {
-  "policySetId": "policy-set-uuid",
-  "policySetName": "personal_loan_policy_set",
-  "executionTimeMs": 25,
   "decision": {
     "status": "APPROVED",
-    "evaluatedAt": "2024-01-15T10:30:00Z"
+    "reasons": null
   },
   "offer": {
-    "loanAmount": 500000,
-    "rateOfInterest": 10.5,
+    "loanAmount": 300000.0,
+    "rateOfInterest": 12.0,
     "processingFee": 1.5,
-    "tenure": 60,
-    "emi": 10747,
-    "tier": "STANDARD"
+    "tenure": 48,
+    "emi": null
   }
 }
 ```
@@ -901,104 +895,23 @@ Request:
 **Response (Rejected - No Offer):**
 ```json
 {
-  "policySetId": "policy-set-uuid",
-  "policySetName": "personal_loan_policy_set",
-  "executionTimeMs": 12,
   "decision": {
     "status": "REJECTED",
-    "evaluatedAt": "2024-01-15T10:30:00Z",
     "reasons": [
-      {
-        "code": "CREDIT_SCORE_LOW",
-        "message": "Credit score must be at least 650",
-        "ruleName": "credit_score_check",
-        "actualValue": 580,
-        "requiredValue": 650
-      },
-      {
-        "code": "AGE_CHECK_FAILED",
-        "message": "Applicant must be at least 21 years old",
-        "ruleName": "age_check",
-        "actualValue": 19,
-        "requiredValue": 21
-      }
+      "Rule 'minimum_age_rule' failed: 18 GTE 21 = false"
     ]
   },
   "offer": null
 }
 ```
 
-**Response (Approved with Trace):**
+**Response (Missing Input - 400 Bad Request):**
 ```json
 {
-  "policySetId": "policy-set-uuid",
-  "policySetName": "personal_loan_policy_set",
-  "executionTimeMs": 28,
-  "decision": {
-    "status": "APPROVED",
-    "evaluatedAt": "2024-01-15T10:30:00Z"
-  },
-  "offer": {
-    "loanAmount": 1000000,
-    "rateOfInterest": 9.5,
-    "processingFee": 1.0,
-    "tenure": 84,
-    "emi": 15093,
-    "tier": "PREMIUM"
-  },
-  "trace": {
-    "extractedFeatures": {
-      "user_age": 28,
-      "annual_income": 750000,
-      "credit_score": 720,
-      "employment_type": "SALARIED"
-    },
-    "booleanPolicyTrace": {
-      "policyName": "loan_eligibility",
-      "result": true,
-      "nodeEvaluations": [
-        {
-          "nodeId": "root",
-          "type": "COMPOSITE",
-          "logicalOperator": "AND",
-          "result": true,
-          "children": [
-            {
-              "nodeId": "node-1",
-              "type": "LEAF",
-              "ruleName": "age_check",
-              "featureName": "user_age",
-              "featureValue": 28,
-              "operatorCode": "GTE",
-              "operand": 21,
-              "result": true
-            },
-            {
-              "nodeId": "node-2",
-              "type": "LEAF",
-              "ruleName": "credit_score_check",
-              "featureName": "credit_score",
-              "featureValue": 720,
-              "operatorCode": "GTE",
-              "operand": 650,
-              "result": true
-            }
-          ]
-        }
-      ]
-    },
-    "offerPolicyTrace": {
-      "policyName": "loan_offer",
-      "matchedTier": "PREMIUM",
-      "nodeEvaluations": [
-        {
-          "nodeId": "premium-tier-node",
-          "result": true,
-          "description": "Credit score >= 700 AND income >= 500000"
-        }
-      ]
-    }
-  }
+  "code": "VALIDATION_ERROR",
+  "message": "Missing required input for feature(s): applicant_income, applicant_credit_score",
+  "details": null,
+  "timestamp": "2025-12-31T10:30:00.123456"
 }
 ```
 

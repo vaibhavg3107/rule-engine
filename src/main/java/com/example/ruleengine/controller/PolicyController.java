@@ -2,6 +2,7 @@ package com.example.ruleengine.controller;
 
 import com.example.ruleengine.dto.request.CreatePolicyRequest;
 import com.example.ruleengine.dto.request.TestRuleRequest;
+import com.example.ruleengine.dto.response.PolicyEvaluationResultResponse;
 import com.example.ruleengine.dto.response.PolicyResponse;
 import com.example.ruleengine.entity.enums.PolicyType;
 import com.example.ruleengine.service.PolicyEvaluationService;
@@ -71,10 +72,10 @@ public class PolicyController {
 
     @PostMapping("/{id}/evaluate")
     @Operation(summary = "Evaluate a policy against input data")
-    public ResponseEntity<PolicyEvaluationService.PolicyEvaluationResult> evaluatePolicy(
+    public ResponseEntity<PolicyEvaluationResultResponse> evaluatePolicy(
             @PathVariable UUID id,
             @Valid @RequestBody TestRuleRequest request) {
-        PolicyEvaluationService.PolicyEvaluationResult result = 
+        PolicyEvaluationResultResponse result = 
                 policyEvaluationService.evaluatePolicy(id, request.getInputData());
         return ResponseEntity.ok(result);
     }

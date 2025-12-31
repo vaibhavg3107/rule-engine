@@ -1,5 +1,9 @@
 package com.example.ruleengine.service;
 
+import com.example.ruleengine.dto.response.DecisionResponse;
+import com.example.ruleengine.dto.response.OfferResponse;
+import com.example.ruleengine.dto.response.PolicyEvaluationResultResponse;
+import com.example.ruleengine.dto.response.TreeEvaluationResultResponse;
 import com.example.ruleengine.entity.Feature;
 import com.example.ruleengine.entity.Policy;
 import com.example.ruleengine.entity.Rule;
@@ -24,7 +28,7 @@ public class PolicyEvaluationService {
     private final FeatureExtractionService featureExtractionService;
     private final TreeEvaluationService treeEvaluationService;
 
-    public PolicyEvaluationResult evaluatePolicy(UUID policyId, Map<String, Object> inputData) {
+    public PolicyEvaluationResultResponse evaluatePolicy(UUID policyId, Map<String, Object> inputData) {
         Policy policy = policyService.getPolicyEntityById(policyId);
         
         Set<UUID> ruleIds = collectRuleIds(policy.getRootNode());
@@ -37,10 +41,10 @@ public class PolicyEvaluationService {
         
         Map<String, Object> extractedFeatures = featureExtractionService.extractFeatures(features, inputData);
         
-        TreeEvaluationService.TreeEvaluationResult treeResult = 
+        TreeEvaluationResultResponse treeResult = 
                 treeEvaluationService.evaluateTree(policy.getRootNode(), extractedFeatures);
         
-        PolicyEvaluationResult result = new PolicyEvaluationResult();
+        PolicyEvaluationResultResponse result = new PolicyEvaluationResultResponse();
         result.setPolicyId(policyId);
         result.setPolicyName(policy.getName());
         result.setPolicyType(policy.getPolicyType());
@@ -77,8 +81,8 @@ public class PolicyEvaluationService {
         return ruleIds;
     }
 
-    private Decision buildBooleanDecision(TreeEvaluationService.TreeEvaluationResult treeResult) {
-        Decision decision = new Decision();
+    private DecisionResponse buildBooleanDecision(TreeEvaluationResultResponse treeResult) {
+        DecisionResponse decision = new DecisionResponse();
         decision.setStatus(treeResult.isResult() ? "APPROVED" : "REJECTED");
         
         if (!treeResult.isResult()) {
@@ -88,7 +92,7 @@ public class PolicyEvaluationService {
         return decision;
     }
 
-    private List<String> collectFailureReasons(TreeEvaluationService.TreeEvaluationResult result) {
+    private List<String> collectFailureReasons(TreeEvaluationResultResponse result) {
         List<String> reasons = new ArrayList<>();
         
         if (result.getFailureReason() != null && "LEAF".equals(result.getNodeType())) {
@@ -96,7 +100,7 @@ public class PolicyEvaluationService {
         }
         
         if (result.getChildResults() != null) {
-            for (TreeEvaluationService.TreeEvaluationResult child : result.getChildResults()) {
+            for (TreeEvaluationResultResponse child : result.getChildResults()) {
                 reasons.addAll(collectFailureReasons(child));
             }
         }
@@ -105,9 +109,9 @@ public class PolicyEvaluationService {
     }
 
     @SuppressWarnings("unchecked")
-    private Offer buildOffer(Map<String, Object> outputMapping, Map<String, Object> extractedFeatures, 
-                             TreeEvaluationService.TreeEvaluationResult treeResult) {
-        Offer offer = new Offer();
+    private OfferResponse buildOffer(Map<String, Object> outputMapping, Map<String, Object> extractedFeatures, 
+                             TreeEvaluationResultResponse treeResult) {
+        OfferResponse offer = new OfferResponse();
         
         if (outputMapping == null) {
             return offer;
@@ -133,7 +137,7 @@ public class PolicyEvaluationService {
         return offer;
     }
 
-    private void applyOfferValues(Offer offer, Map<String, Object> values) {
+    private void applyOfferValues(OfferResponse offer, Map<String, Object> values) {
         if (values.containsKey("loanAmount")) {
             offer.setLoanAmount(((Number) values.get("loanAmount")).doubleValue());
         }
@@ -193,29 +197,4 @@ public class PolicyEvaluationService {
         return false;
     }
 
-    @lombok.Data
-    public static class PolicyEvaluationResult {
-        private UUID policyId;
-        private String policyName;
-        private PolicyType policyType;
-        private Map<String, Object> extractedFeatures;
-        private TreeEvaluationService.TreeEvaluationResult treeResult;
-        private Decision decision;
-        private Offer offer;
-    }
-
-    @lombok.Data
-    public static class Decision {
-        private String status;
-        private List<String> reasons;
-    }
-
-    @lombok.Data
-    public static class Offer {
-        private Double loanAmount;
-        private Double rateOfInterest;
-        private Double processingFee;
-        private Integer tenure;
-        private Double emi;
-    }
 }

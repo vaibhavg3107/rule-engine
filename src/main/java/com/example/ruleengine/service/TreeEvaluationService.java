@@ -1,5 +1,6 @@
 package com.example.ruleengine.service;
 
+import com.example.ruleengine.dto.response.TreeEvaluationResultResponse;
 import com.example.ruleengine.entity.Rule;
 import com.example.ruleengine.exception.ValidationException;
 import com.example.ruleengine.repository.RuleRepository;
@@ -17,7 +18,7 @@ public class TreeEvaluationService {
     private final RuleRepository ruleRepository;
     private final RuleEvaluationService ruleEvaluationService;
 
-    public TreeEvaluationResult evaluateTree(Map<String, Object> node, Map<String, Object> extractedFeatures) {
+    public TreeEvaluationResultResponse evaluateTree(Map<String, Object> node, Map<String, Object> extractedFeatures) {
         String nodeType = (String) node.get("type");
         
         if ("LEAF".equals(nodeType)) {
@@ -29,7 +30,7 @@ public class TreeEvaluationService {
         }
     }
 
-    private TreeEvaluationResult evaluateLeafNode(Map<String, Object> node, Map<String, Object> extractedFeatures) {
+    private TreeEvaluationResultResponse evaluateLeafNode(Map<String, Object> node, Map<String, Object> extractedFeatures) {
         String ruleIdStr = (String) node.get("ruleId");
         UUID ruleId = UUID.fromString(ruleIdStr);
         
@@ -41,7 +42,7 @@ public class TreeEvaluationService {
         
         boolean result = ruleEvaluationService.evaluateRule(rule, featureValue);
         
-        TreeEvaluationResult evalResult = new TreeEvaluationResult();
+        TreeEvaluationResultResponse evalResult = new TreeEvaluationResultResponse();
         evalResult.setResult(result);
         evalResult.setNodeType("LEAF");
         evalResult.setRuleId(ruleId);
@@ -60,11 +61,11 @@ public class TreeEvaluationService {
     }
 
     @SuppressWarnings("unchecked")
-    private TreeEvaluationResult evaluateCompositeNode(Map<String, Object> node, Map<String, Object> extractedFeatures) {
+    private TreeEvaluationResultResponse evaluateCompositeNode(Map<String, Object> node, Map<String, Object> extractedFeatures) {
         String operator = (String) node.get("operator");
         List<Map<String, Object>> children = (List<Map<String, Object>>) node.get("children");
         
-        TreeEvaluationResult result = new TreeEvaluationResult();
+        TreeEvaluationResultResponse result = new TreeEvaluationResultResponse();
         result.setNodeType("COMPOSITE");
         result.setOperator(operator);
         result.setChildResults(new ArrayList<>());
@@ -86,12 +87,12 @@ public class TreeEvaluationService {
         return result;
     }
 
-    private boolean evaluateAnd(List<Map<String, Object>> children, Map<String, Object> extractedFeatures, TreeEvaluationResult parentResult) {
+    private boolean evaluateAnd(List<Map<String, Object>> children, Map<String, Object> extractedFeatures, TreeEvaluationResultResponse parentResult) {
         List<String> failureReasons = new ArrayList<>();
         boolean allPassed = true;
         
         for (Map<String, Object> child : children) {
-            TreeEvaluationResult childResult = evaluateTree(child, extractedFeatures);
+            TreeEvaluationResultResponse childResult = evaluateTree(child, extractedFeatures);
             parentResult.getChildResults().add(childResult);
             
             if (!childResult.isResult()) {
@@ -109,12 +110,12 @@ public class TreeEvaluationService {
         return allPassed;
     }
 
-    private boolean evaluateOr(List<Map<String, Object>> children, Map<String, Object> extractedFeatures, TreeEvaluationResult parentResult) {
+    private boolean evaluateOr(List<Map<String, Object>> children, Map<String, Object> extractedFeatures, TreeEvaluationResultResponse parentResult) {
         List<String> failureReasons = new ArrayList<>();
         boolean anyPassed = false;
         
         for (Map<String, Object> child : children) {
-            TreeEvaluationResult childResult = evaluateTree(child, extractedFeatures);
+            TreeEvaluationResultResponse childResult = evaluateTree(child, extractedFeatures);
             parentResult.getChildResults().add(childResult);
             
             if (childResult.isResult()) {
@@ -131,8 +132,8 @@ public class TreeEvaluationService {
         return anyPassed;
     }
 
-    private boolean evaluateNot(Map<String, Object> child, Map<String, Object> extractedFeatures, TreeEvaluationResult parentResult) {
-        TreeEvaluationResult childResult = evaluateTree(child, extractedFeatures);
+    private boolean evaluateNot(Map<String, Object> child, Map<String, Object> extractedFeatures, TreeEvaluationResultResponse parentResult) {
+        TreeEvaluationResultResponse childResult = evaluateTree(child, extractedFeatures);
         parentResult.getChildResults().add(childResult);
         
         boolean result = !childResult.isResult();
@@ -141,20 +142,5 @@ public class TreeEvaluationService {
         }
         
         return result;
-    }
-
-    @lombok.Data
-    public static class TreeEvaluationResult {
-        private boolean result;
-        private String nodeType;
-        private String operator;
-        private UUID ruleId;
-        private String ruleName;
-        private String featureName;
-        private Object featureValue;
-        private String operatorCode;
-        private Object operand;
-        private String failureReason;
-        private List<TreeEvaluationResult> childResults;
     }
 }

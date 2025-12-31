@@ -1,10 +1,12 @@
 package com.example.ruleengine.service;
 
+import com.example.ruleengine.dto.response.OfferResultSummaryResponse;
+import com.example.ruleengine.dto.response.PolicyEvaluationResultResponse;
+import com.example.ruleengine.dto.response.UnifiedEvaluationResultResponse;
 import com.example.ruleengine.entity.Policy;
 import com.example.ruleengine.entity.PolicySet;
 import com.example.ruleengine.entity.PolicySetExecutionLog;
 import com.example.ruleengine.entity.PolicySetOfferPolicy;
-import com.example.ruleengine.entity.enums.EvaluationStrategy;
 import com.example.ruleengine.repository.PolicySetExecutionLogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +30,12 @@ public class UnifiedEvaluationService {
     private final PolicySetExecutionLogRepository executionLogRepository;
     private final ObjectMapper objectMapper;
 
-    public UnifiedEvaluationResult evaluate(UUID policySetId, Map<String, Object> inputData) {
+    public UnifiedEvaluationResultResponse evaluate(UUID policySetId, Map<String, Object> inputData) {
         long startTime = System.currentTimeMillis();
         
         PolicySet policySet = policySetService.getPolicySetEntityById(policySetId);
         
-        UnifiedEvaluationResult result = new UnifiedEvaluationResult();
+        UnifiedEvaluationResultResponse result = new UnifiedEvaluationResultResponse();
         result.setPolicySetId(policySetId);
         result.setPolicySetName(policySet.getName());
         result.setEvaluationStrategy(policySet.getEvaluationStrategy());
@@ -63,7 +65,7 @@ public class UnifiedEvaluationService {
     }
 
     private void logExecution(PolicySet policySet, Map<String, Object> inputData, 
-                              UnifiedEvaluationResult result, int executionTimeMs) {
+                              UnifiedEvaluationResultResponse result, int executionTimeMs) {
         try {
             Map<String, Object> extractedFeatures = new HashMap<>();
             if (result.getBooleanResult() != null && result.getBooleanResult().getExtractedFeatures() != null) {
@@ -104,11 +106,11 @@ public class UnifiedEvaluationService {
         }
     }
 
-    private void evaluateBooleanFirst(UnifiedEvaluationResult result, PolicySet policySet,
+    private void evaluateBooleanFirst(UnifiedEvaluationResultResponse result, PolicySet policySet,
                                        Policy booleanPolicy, List<PolicySetOfferPolicy> offerPolicies,
                                        Map<String, Object> inputData) {
         if (booleanPolicy != null) {
-            PolicyEvaluationService.PolicyEvaluationResult booleanResult = 
+            PolicyEvaluationResultResponse booleanResult = 
                     policyEvaluationService.evaluatePolicy(booleanPolicy.getId(), inputData);
             result.setBooleanResult(booleanResult);
             result.setDecision(booleanResult.getDecision());
@@ -124,14 +126,14 @@ public class UnifiedEvaluationService {
         }
     }
 
-    private void evaluateOfferFirst(UnifiedEvaluationResult result, PolicySet policySet,
+    private void evaluateOfferFirst(UnifiedEvaluationResultResponse result, PolicySet policySet,
                                      Policy booleanPolicy, List<PolicySetOfferPolicy> offerPolicies,
                                      Map<String, Object> inputData) {
         evaluateOfferPoliciesWithPriority(result, offerPolicies, inputData);
 
         if (result.getOfferResult() != null && "APPROVED".equals(result.getOfferResult().getDecision().getStatus())) {
             if (booleanPolicy != null) {
-                PolicyEvaluationService.PolicyEvaluationResult booleanResult = 
+                PolicyEvaluationResultResponse booleanResult = 
                         policyEvaluationService.evaluatePolicy(booleanPolicy.getId(), inputData);
                 result.setBooleanResult(booleanResult);
                 result.setDecision(booleanResult.getDecision());
@@ -139,7 +141,7 @@ public class UnifiedEvaluationService {
                 result.setDecision(result.getOfferResult().getDecision());
             }
         } else if (booleanPolicy != null) {
-            PolicyEvaluationService.PolicyEvaluationResult booleanResult = 
+            PolicyEvaluationResultResponse booleanResult = 
                     policyEvaluationService.evaluatePolicy(booleanPolicy.getId(), inputData);
             result.setBooleanResult(booleanResult);
             result.setDecision(booleanResult.getDecision());
@@ -148,10 +150,10 @@ public class UnifiedEvaluationService {
         }
     }
 
-    private void evaluateParallel(UnifiedEvaluationResult result, PolicySet policySet,
+    private void evaluateParallel(UnifiedEvaluationResultResponse result, PolicySet policySet,
                                    Policy booleanPolicy, List<PolicySetOfferPolicy> offerPolicies,
                                    Map<String, Object> inputData) {
-        PolicyEvaluationService.PolicyEvaluationResult booleanResult = null;
+        PolicyEvaluationResultResponse booleanResult = null;
 
         if (booleanPolicy != null) {
             booleanResult = policyEvaluationService.evaluatePolicy(booleanPolicy.getId(), inputData);
@@ -170,7 +172,7 @@ public class UnifiedEvaluationService {
         }
     }
 
-    private void evaluateOfferPoliciesWithPriority(UnifiedEvaluationResult result,
+    private void evaluateOfferPoliciesWithPriority(UnifiedEvaluationResultResponse result,
                                                     List<PolicySetOfferPolicy> offerPolicies,
                                                     Map<String, Object> inputData) {
         List<OfferPolicyEvaluationResult> allOfferResults = new ArrayList<>();
@@ -179,7 +181,7 @@ public class UnifiedEvaluationService {
             for (PolicySetOfferPolicy psop : offerPolicies) {
                 if (psop.getEnabled() == null || psop.getEnabled()) {
                     try {
-                        PolicyEvaluationService.PolicyEvaluationResult evalResult = 
+                        PolicyEvaluationResultResponse evalResult = 
                                 policyEvaluationService.evaluatePolicy(psop.getOfferPolicy().getId(), inputData);
                         allOfferResults.add(new OfferPolicyEvaluationResult(
                                 psop.getPriority(),
@@ -218,7 +220,7 @@ public class UnifiedEvaluationService {
             }
 
             result.setAllOfferResults(allOfferResults.stream()
-                    .map(r -> new OfferResultSummary(r.policyName, r.priority, 
+                    .map(r -> new OfferResultSummaryResponse(r.policyName, r.priority, 
                             r.result.getDecision().getStatus(), r.result.getOffer()))
                     .collect(java.util.stream.Collectors.toList()));
         }
@@ -229,43 +231,6 @@ public class UnifiedEvaluationService {
     private static class OfferPolicyEvaluationResult {
         private int priority;
         private String policyName;
-        private PolicyEvaluationService.PolicyEvaluationResult result;
-    }
-
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    @lombok.NoArgsConstructor
-    public static class OfferResultSummary {
-        private String policyName;
-        private Integer priority;
-        private String decisionStatus;
-        private PolicyEvaluationService.Offer offer;
-    }
-
-    @lombok.Data
-    public static class UnifiedEvaluationResult {
-        // Internal fields for logging (not serialized to response)
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private UUID policySetId;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private String policySetName;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private EvaluationStrategy evaluationStrategy;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private LocalDateTime evaluatedAt;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private PolicyEvaluationService.PolicyEvaluationResult booleanResult;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private PolicyEvaluationService.PolicyEvaluationResult offerResult;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private String selectedOfferPolicyName;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private Integer selectedOfferPolicyPriority;
-        @com.fasterxml.jackson.annotation.JsonIgnore
-        private List<OfferResultSummary> allOfferResults;
-
-        // Response fields
-        private PolicyEvaluationService.Decision decision;
-        private PolicyEvaluationService.Offer offer;
+        private PolicyEvaluationResultResponse result;
     }
 }
