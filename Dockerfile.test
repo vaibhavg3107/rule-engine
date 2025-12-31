@@ -1,0 +1,11 @@
+# Test stage - runs unit tests
+FROM maven:3.9.6-eclipse-temurin-21-alpine AS test
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+
+# Run unit tests only (no integration tests that need Docker-in-Docker)
+RUN mvn test -Dtest=RuleEvaluationServiceTest,FeatureExtractionServiceTest -DfailIfNoTests=false
+
+# Output test results
+CMD ["cat", "target/surefire-reports/*.txt"]

@@ -1,0 +1,109 @@
+{
+  "info": {
+    "name": "Rule Engine API",
+    "description": "Comprehensive API collection for the Rule Engine with multiple offer policies support",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "featureId", "value": ""},
+    {"key": "ruleId", "value": ""},
+    {"key": "policyId", "value": ""},
+    {"key": "offerPolicyId", "value": ""},
+    {"key": "offerPolicyId2", "value": ""},
+    {"key": "policySetId", "value": ""},
+    {"key": "seededBooleanPolicyId", "value": "c1000000-0000-0000-0000-000000000001"},
+    {"key": "seededOfferPolicyId", "value": "c1000000-0000-0000-0000-000000000003"},
+    {"key": "seededOfferPolicyId2", "value": "c1000000-0000-0000-0000-000000000004"},
+    {"key": "seededPolicySetId", "value": "d1000000-0000-0000-0000-000000000001"}
+  ],
+  "item": [
+    {
+      "name": "Features",
+      "item": [
+        {"name": "Create Feature - Numeric", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_age\", \"description\": \"Age\", \"featureType\": \"NUMERIC\", \"extractionConfig\": {\"type\": \"JSON_PATH\", \"path\": \"$.applicant.age\"}}"}, "url": {"raw": "{{baseUrl}}/api/v1/features", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features"]}}},
+        {"name": "Create Feature - String", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_emp_type\", \"description\": \"Employment Type\", \"featureType\": \"STRING\", \"extractionConfig\": {\"type\": \"JSON_PATH\", \"path\": \"$.applicant.employmentType\"}}"}, "url": {"raw": "{{baseUrl}}/api/v1/features", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features"]}}},
+        {"name": "Get All Features", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/features", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features"]}}},
+        {"name": "Get Feature by ID", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/features/{{featureId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features", "{{featureId}}"]}}},
+        {"name": "Get Features by Type", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/features/type/NUMERIC", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features", "type", "NUMERIC"]}}},
+        {"name": "Update Feature", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_age\", \"description\": \"Updated Age\", \"featureType\": \"NUMERIC\", \"extractionConfig\": {\"type\": \"JSON_PATH\", \"path\": \"$.applicant.age\"}}"}, "url": {"raw": "{{baseUrl}}/api/v1/features/{{featureId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features", "{{featureId}}"]}}},
+        {"name": "Delete Feature", "request": {"method": "DELETE", "url": {"raw": "{{baseUrl}}/api/v1/features/{{featureId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "features", "{{featureId}}"]}}}
+      ]
+    },
+    {
+      "name": "Operators",
+      "item": [
+        {"name": "Get All Operators", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators"]}}},
+        {"name": "Get Operator - EQ", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators/EQ", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators", "EQ"]}}},
+        {"name": "Get Operator - GTE", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators/GTE", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators", "GTE"]}}},
+        {"name": "Get Operator - IN", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators/IN", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators", "IN"]}}},
+        {"name": "Get Operator - BETWEEN", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators/BETWEEN", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators", "BETWEEN"]}}},
+        {"name": "Get Operators by Feature Type", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/operators/feature-type/NUMERIC", "host": ["{{baseUrl}}"], "path": ["api", "v1", "operators", "feature-type", "NUMERIC"]}}}
+      ]
+    },
+    {
+      "name": "Rules",
+      "item": [
+        {"name": "Create Rule - GTE", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_min_age\", \"description\": \"Min age 21\", \"featureId\": \"{{featureId}}\", \"operatorCode\": \"GTE\", \"operand\": 21}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules"]}}},
+        {"name": "Create Rule - IN", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_emp_rule\", \"description\": \"Valid employment\", \"featureId\": \"{{featureId}}\", \"operatorCode\": \"IN\", \"operand\": [\"SALARIED\", \"SELF_EMPLOYED\"]}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules"]}}},
+        {"name": "Create Rule - BETWEEN", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_age_range\", \"description\": \"Age 21-60\", \"featureId\": \"{{featureId}}\", \"operatorCode\": \"BETWEEN\", \"operand\": [21, 60]}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules"]}}},
+        {"name": "Get All Rules", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/rules", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules"]}}},
+        {"name": "Get Rule by ID", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules", "{{ruleId}}"]}}},
+        {"name": "Test Rule - Pass", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"ruleId\": \"{{ruleId}}\", \"inputData\": {\"applicant\": {\"age\": 30}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules/test", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules", "test"]}}},
+        {"name": "Test Rule - Fail", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"ruleId\": \"{{ruleId}}\", \"inputData\": {\"applicant\": {\"age\": 18}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules/test", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules", "test"]}}},
+        {"name": "Update Rule", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_min_age\", \"description\": \"Updated\", \"featureId\": \"{{featureId}}\", \"operatorCode\": \"GTE\", \"operand\": 18}"}, "url": {"raw": "{{baseUrl}}/api/v1/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules", "{{ruleId}}"]}}},
+        {"name": "Delete Rule", "request": {"method": "DELETE", "url": {"raw": "{{baseUrl}}/api/v1/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "rules", "{{ruleId}}"]}}}
+      ]
+    },
+    {
+      "name": "Policies",
+      "item": [
+        {"name": "Create Boolean Policy - Simple", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_simple_policy\", \"description\": \"Simple policy\", \"policyType\": \"BOOLEAN\", \"rootNode\": {\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies"]}}},
+        {"name": "Create Boolean Policy - AND", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_and_policy\", \"description\": \"AND policy\", \"policyType\": \"BOOLEAN\", \"rootNode\": {\"type\": \"COMPOSITE\", \"operator\": \"AND\", \"children\": [{\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}, {\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}]}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies"]}}},
+        {"name": "Create Boolean Policy - OR", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_or_policy\", \"description\": \"OR policy\", \"policyType\": \"BOOLEAN\", \"rootNode\": {\"type\": \"COMPOSITE\", \"operator\": \"OR\", \"children\": [{\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}, {\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}]}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies"]}}},
+        {"name": "Create Offer Policy", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_offer_policy\", \"description\": \"Offer policy\", \"policyType\": \"OFFER\", \"rootNode\": {\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}, \"outputMapping\": {\"defaultOutput\": {\"loanAmount\": 100000, \"rateOfInterest\": 12.5}, \"conditionalOutputs\": [{\"condition\": \"credit_score >= 750\", \"output\": {\"loanAmount\": 500000, \"rateOfInterest\": 9.5}}]}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies"]}}},
+        {"name": "Get All Policies", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policies", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies"]}}},
+        {"name": "Get Policy by ID", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "{{policyId}}"]}}},
+        {"name": "Get Policies by Type - BOOLEAN", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policies/type/BOOLEAN", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "type", "BOOLEAN"]}}},
+        {"name": "Get Policies by Type - OFFER", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policies/type/OFFER", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "type", "OFFER"]}}},
+        {"name": "Evaluate Policy - Approved", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 30, \"creditScore\": 720}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "{{policyId}}", "evaluate"]}}},
+        {"name": "Evaluate Policy - Rejected", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 18, \"creditScore\": 600}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "{{policyId}}", "evaluate"]}}},
+        {"name": "Update Policy", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_simple_policy\", \"description\": \"Updated\", \"policyType\": \"BOOLEAN\", \"rootNode\": {\"type\": \"LEAF\", \"ruleId\": \"{{ruleId}}\"}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "{{policyId}}"]}}},
+        {"name": "Delete Policy", "request": {"method": "DELETE", "url": {"raw": "{{baseUrl}}/api/v1/policies/{{policyId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policies", "{{policyId}}"]}}}
+      ]
+    },
+    {
+      "name": "Policy Sets",
+      "item": [
+        {"name": "Create PolicySet - Single Offer", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_policy_set\", \"description\": \"Test set with single offer\", \"booleanPolicyId\": \"{{policyId}}\", \"offerPolicies\": [{\"policyId\": \"{{offerPolicyId}}\", \"priority\": 1, \"enabled\": true}], \"evaluationStrategy\": \"BOOLEAN_FIRST\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Create PolicySet - Multiple Offers with Priority", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_multi_offer_set\", \"description\": \"Test set with multiple offers\", \"booleanPolicyId\": \"{{policyId}}\", \"offerPolicies\": [{\"policyId\": \"{{offerPolicyId}}\", \"priority\": 10, \"enabled\": true}, {\"policyId\": \"{{offerPolicyId2}}\", \"priority\": 20, \"enabled\": true}], \"evaluationStrategy\": \"BOOLEAN_FIRST\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Create PolicySet - PARALLEL Strategy", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_parallel_set\", \"description\": \"Parallel evaluation\", \"booleanPolicyId\": \"{{policyId}}\", \"offerPolicies\": [{\"policyId\": \"{{offerPolicyId}}\", \"priority\": 1, \"enabled\": true}], \"evaluationStrategy\": \"PARALLEL\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Create PolicySet - Using Seeded Policies", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_seeded_policy_set\", \"description\": \"Using seeded policies\", \"booleanPolicyId\": \"{{seededBooleanPolicyId}}\", \"offerPolicies\": [{\"policyId\": \"{{seededOfferPolicyId}}\", \"priority\": 10, \"enabled\": true}, {\"policyId\": \"{{seededOfferPolicyId2}}\", \"priority\": 20, \"enabled\": true}], \"evaluationStrategy\": \"BOOLEAN_FIRST\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Get All PolicySets", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Get PolicySet by ID", "request": {"method": "GET", "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}"]}}},
+        {"name": "Unified Eval - Approved", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 30, \"creditScore\": 720, \"monthlyIncome\": 50000}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}", "evaluate"]}}},
+        {"name": "Unified Eval - Rejected", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 18, \"creditScore\": 600, \"monthlyIncome\": 15000}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}", "evaluate"]}}},
+        {"name": "Update PolicySet - Change Offer Priorities", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"test_policy_set\", \"description\": \"Updated priorities\", \"offerPolicies\": [{\"policyId\": \"{{offerPolicyId}}\", \"priority\": 5, \"enabled\": true}, {\"policyId\": \"{{offerPolicyId2}}\", \"priority\": 15, \"enabled\": true}], \"evaluationStrategy\": \"PARALLEL\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}"]}}},
+        {"name": "Delete PolicySet", "request": {"method": "DELETE", "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}"]}}}
+      ]
+    },
+    {
+      "name": "Seeded Data Examples",
+      "item": [
+        {"name": "Eval Basic Loan - Approved", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 30, \"monthlyIncome\": 50000, \"creditScore\": 720, \"employmentType\": \"SALARIED\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{seededPolicySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{seededPolicySetId}}", "evaluate"]}}},
+        {"name": "Eval Basic Loan - Rejected (Age)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 18, \"monthlyIncome\": 50000, \"creditScore\": 720, \"employmentType\": \"SALARIED\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{seededPolicySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{seededPolicySetId}}", "evaluate"]}}},
+        {"name": "Eval Basic Loan - Premium Offer", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 35, \"monthlyIncome\": 100000, \"creditScore\": 780, \"employmentType\": \"SALARIED\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{seededPolicySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{seededPolicySetId}}", "evaluate"]}}},
+        {"name": "Eval Premium Loan - Full Data", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 40, \"monthlyIncome\": 150000, \"creditScore\": 800, \"employmentType\": \"BUSINESS\", \"experienceYears\": 10, \"debtToIncomeRatio\": 0.3, \"existingLoansCount\": 1}, \"loan\": {\"amountRequested\": 2000000, \"tenureMonths\": 60, \"purpose\": \"HOME\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/d1000000-0000-0000-0000-000000000002/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "d1000000-0000-0000-0000-000000000002", "evaluate"]}}}
+      ]
+    },
+    {
+      "name": "Multi-Offer Priority Examples",
+      "item": [
+        {"name": "Create Multi-Offer PolicySet (Seeded)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"name\": \"multi_offer_priority_test\", \"description\": \"PolicySet with multiple offer policies - higher priority wins\", \"booleanPolicyId\": \"c1000000-0000-0000-0000-000000000001\", \"offerPolicies\": [{\"policyId\": \"c1000000-0000-0000-0000-000000000003\", \"priority\": 10, \"enabled\": true}, {\"policyId\": \"c1000000-0000-0000-0000-000000000004\", \"priority\": 20, \"enabled\": true}], \"evaluationStrategy\": \"BOOLEAN_FIRST\"}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets"]}}},
+        {"name": "Eval Multi-Offer - Standard Wins (Premium Rejected)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 30, \"monthlyIncome\": 50000, \"creditScore\": 720, \"employmentType\": \"SALARIED\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}", "evaluate"]}, "description": "Credit score < 750, so premium offer (priority 20) is rejected, standard offer (priority 10) is selected"}},
+        {"name": "Eval Multi-Offer - Highest Priority Wins (Both Approved)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 35, \"monthlyIncome\": 80000, \"creditScore\": 760, \"employmentType\": \"SALARIED\", \"experienceYears\": 8, \"debtToIncomeRatio\": 0.25, \"existingLoansCount\": 0}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}", "evaluate"]}, "description": "Both offer policies approve - premium (priority 20) and standard (priority 10) both pass. Response shows selectedOfferPolicyName=premium_loan_offer_policy, selectedOfferPolicyPriority=20, and allOfferResults showing both policies approved"}},
+        {"name": "Eval Multi-Offer - Premium Wins (High Credit)", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\"inputData\": {\"applicant\": {\"age\": 35, \"monthlyIncome\": 100000, \"creditScore\": 780, \"employmentType\": \"SALARIED\"}}}"}, "url": {"raw": "{{baseUrl}}/api/v1/policy-sets/{{policySetId}}/evaluate", "host": ["{{baseUrl}}"], "path": ["api", "v1", "policy-sets", "{{policySetId}}", "evaluate"]}, "description": "Credit score >= 750, so premium offer (priority 20) is approved and selected as highest priority"}}
+      ]
+    }
+  ]
+}
